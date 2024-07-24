@@ -1,5 +1,8 @@
 #include <cs50.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 
 // Max number of candidates
 #define MAX 9
@@ -116,17 +119,9 @@ void record_preferences(int ranks[])
 {
     for (int i = 0; i < candidate_count; i++)
     {
-        for (int j = 0; j < candidate_count; j++)
+        for (int j = i + 1; j < candidate_count; j++)
         {
-            if (i < j)
-            {
-                preferences[ranks[i]][ranks[j]]++;
-            }
-            else
-            {
-                preferences[i][i] = 0;
-            }
-            
+            preferences[ranks[i]][ranks[j]]++;
         }
     }
     return;
@@ -135,21 +130,22 @@ void record_preferences(int ranks[])
 // Record pairs of candidates where one is preferred over the other
 void add_pairs(void)
 {
-    for (int i = 0, n = 0; i < candidate_count - 1; i++)
+    pair_count = 0;
+    for (int i = 0; i < candidate_count - 1; i++)
     {
         for (int j = i + 1; j < candidate_count; j++)
         {
             if (preferences[i][j] > preferences[j][i])
             {
-                pairs[n].winner = i;
-                pairs[n].loser = j;
-                n++;
+                pairs[pair_count].winner = i;
+                pairs[pair_count].loser = j;
+                pair_count++;
             }
             else if (preferences[i][j] < preferences[j][i])
             {
-                pairs[n].winner = j;
-                pairs[n].loser = i;
-                n++;
+                pairs[pair_count].winner = j;
+                pairs[pair_count].loser = i;
+                pair_count++;
             }
             else
             {
@@ -177,16 +173,67 @@ void sort_pairs(void)
     return;
 }
 
+bool has_cycle(int winner, int loser)
+{
+    while (winner != -1 && winner != loser)
+    {
+        bool cycle_found = false;
+        for (int i = 0; i < candidate_count; i++)
+        {
+            if(locked[i][winner])
+            {
+                cycle_found = true;
+                winner = i;
+            }
+        }
+
+        if(!cycle_found)
+        {
+            winner = -1;
+        }
+    }
+
+    if (winner == loser)
+    {
+        return true;
+    }
+
+    return false;
+    
+}
+
 // Lock pairs into the candidate graph in order, without creating cycles
 void lock_pairs(void)
 {
-    // TODO
+    for (int i = 0; i < pair_count; i++)
+    {
+        if (!has_cycle(pairs[i].winner, pairs[i].loser))
+        {
+            locked[pairs[i].winner][pairs[i].loser] = true;
+        }
+    }
     return;
 }
 
 // Print the winner of the election
 void print_winner(void)
 {
-    // TODO
-    return;
+    for(int i = 0; i < candidate_count; i++)
+    {
+        bool is_source = true;
+        for(int j = 0; j < candidate_count; j++)
+        {
+            if(locked[j][i])
+            {
+                is_source = false;
+                break;
+            }
+        }
+
+        if (is_source)
+        {
+            printf("%s\n", candidates[i]);
+            return;
+        }
+    }
 }
