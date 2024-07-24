@@ -154,7 +154,6 @@ void add_pairs(void)
         }
     }
     
-    
     return;
 }
 
@@ -175,31 +174,23 @@ void sort_pairs(void)
 
 bool has_cycle(int winner, int loser)
 {
-    while (winner != -1 && winner != loser)
-    {
-        bool cycle_found = false;
-        for (int i = 0; i < candidate_count; i++)
-        {
-            if(locked[i][winner])
-            {
-                cycle_found = true;
-                winner = i;
-            }
-        }
-
-        if(!cycle_found)
-        {
-            winner = -1;
-        }
-    }
-
     if (winner == loser)
     {
         return true;
     }
 
+    for (int i = 0; i < candidate_count; i++)
+    {
+        if (locked[loser][i])
+        {
+            if (has_cycle(winner, i))
+            {
+                return true;
+            }
+        }
+    }
+
     return false;
-    
 }
 
 // Lock pairs into the candidate graph in order, without creating cycles
