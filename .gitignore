@@ -53,3 +53,5 @@ dkms.conf
 
 Algorithms/plurality/plurality
 Algorithms/tideman/cycling.c
+Memory/notes.c
+Memory/notes
